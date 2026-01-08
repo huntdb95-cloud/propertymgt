@@ -9,10 +9,13 @@ import {
 
 /** 1) Paste your Firebase config here (Firebase Console → Project settings) */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyAnaQ5VJCnGD-M12ckzIsYfKR4DQ8h1L3k",
+    authDomain: "propert-ee9fb.firebaseapp.com",
+    projectId: "propert-ee9fb",
+    storageBucket: "propert-ee9fb.firebasestorage.app",
+    messagingSenderId: "109212957192",
+    appId: "1:109212957192:web:47cce38e2f36b19fce6fbd",
+    measurementId: "G-6QFEFTSLJN"
   // storageBucket, messagingSenderId optional for auth-only pages
 };
 
