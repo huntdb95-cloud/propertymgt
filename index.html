@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Property Tracker - Login</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot" aria-hidden="true"></div>
+      <div>
+        <div class="brand-name">Property Tracker</div>
+        <div class="brand-sub">Track rent, expenses, leases, receipts.</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="demoFillBtn" class="btn btn-outline" type="button">Fill Demo</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Know your cashflow, per house, per month.</h1>
+      <p>
+        Log rent, expenses, receipts, and lease dates.
+        Export monthly summaries and PDF reports.
+      </p>
+
+      <ul class="bullets">
+        <li>Per-property + per-month totals</li>
+        <li>Recurring rent entries from lease dates</li>
+        <li>Receipt attachments for expenses</li>
+        <li>PDF exports for tax time</li>
+      </ul>
+    </section>
+
+    <section class="card" aria-label="Login">
+      <div class="card-title">
+        <h2>Sign in</h2>
+        <p class="muted">Use your email + password (Firebase Auth).</p>
+      </div>
+
+      <form id="loginForm" class="form">
+        <label>
+          Email
+          <input id="email" type="email" autocomplete="email" placeholder="you@email.com" required />
+        </label>
+
+        <label>
+          Password
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+        </label>
+
+        <button class="btn" type="submit" id="loginBtn">Sign in</button>
+
+        <div class="row">
+          <button class="link" type="button" id="forgotBtn">Forgot password?</button>
+          <button class="link" type="button" id="showSignupBtn">Create account</button>
+        </div>
+
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="divider"></div>
+
+      <!-- Signup -->
+      <form id="signupForm" class="form hidden" aria-label="Create account">
+        <div class="card-title" style="margin-bottom:6px;">
+          <h2>Create account</h2>
+          <p class="muted">Email/password sign-up.</p>
+        </div>
+
+        <label>
+          Email
+          <input id="suEmail" type="email" autocomplete="email" placeholder="you@email.com" required />
+        </label>
+
+        <label>
+          Password (min 6 chars)
+          <input id="suPassword" type="password" autocomplete="new-password" placeholder="••••••••" required />
+        </label>
+
+        <button class="btn" type="submit" id="signupBtn">Create account</button>
+
+        <div class="row">
+          <button class="link" type="button" id="cancelSignupBtn">Back to sign in</button>
+        </div>
+
+        <div id="suMsg" class="msg" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="muted">© <span id="year"></span> Property Tracker</div>
+  </footer>
+
+  <script type="module" src="index.js"></script>
+</body>
+</html>
