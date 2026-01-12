@@ -22,7 +22,7 @@ body{
   color:var(--text);
 }
 
-.container{max-width:1200px;margin:0 auto;padding:16px}
+.app{max-width:1200px;margin:0 auto;padding:16px}
 
 .app-header{
   display:flex;
@@ -190,7 +190,14 @@ input:focus, select:focus{border-color:rgba(43,124,255,.7); box-shadow:0 0 0 4px
 .stat.good .v{color:var(--good)}
 .stat.bad .v{color:var(--bad)}
 
-.table-wrap{overflow:auto;margin-top:12px;border-radius:14px;border:1px solid var(--line)}
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  margin-top:12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  width:100%
+}
 .table{width:100%;border-collapse:collapse;min-width:880px;background: rgba(0,0,0,.12)}
 th, td{padding:10px;border-bottom:1px solid var(--line);font-size:12px;white-space:nowrap}
 th{color:var(--muted);text-align:left;background: rgba(255,255,255,.03)}
@@ -210,3 +217,181 @@ th{color:var(--muted);text-align:left;background: rgba(255,255,255,.03)}
 
 .footer{padding:14px;text-align:center;border-top:1px solid var(--line)}
 a.link{color:#b8d3ff}
+
+/* ---------------- Mobile responsiveness ---------------- */
+:root {
+  --pad: 14px;
+  --radius: 12px;
+  --tap: 44px;
+}
+
+/* Make everything easier to size */
+* { box-sizing: border-box; }
+
+/* Images, canvases, etc */
+img, canvas, svg { max-width: 100%; height: auto; }
+
+/* Better inputs/buttons overall - ensure touch-friendly on mobile */
+input, select, textarea, button {
+  font: inherit;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Form rows and toolbars wrap cleanly */
+.form-row, .row, .filters, .toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+/* Panels: consistent spacing */
+.tab-panel, .panel, .card {
+  border-radius: var(--radius);
+}
+
+/* Tables: min-width set below for mobile scrolling */
+
+.table-wrap table {
+  min-width: 720px; /* desktop table width */
+  border-collapse: collapse;
+}
+
+/* Improve touch for table action buttons */
+table button, table .small-btn {
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+/* Modal/popup: fit on phone (for any future modals) */
+.modal, .dialog, .popup, .overlay .content {
+  max-width: 720px;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .app {
+    padding: var(--pad);
+  }
+
+  /* Touch-friendly buttons and inputs on mobile */
+  button, .btn, .button {
+    min-height: var(--tap);
+    padding: 10px 14px;
+  }
+
+  input, select, textarea {
+    min-height: var(--tap);
+    padding: 10px 12px;
+  }
+
+  /* Tabs scroll horizontally on mobile */
+  .tabs, .tab-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+
+  .tabs::-webkit-scrollbar, .tab-bar::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    min-height: var(--tap);
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+
+  /* Reduce big header spacing if needed */
+  .app-header, header, .header {
+    padding: 10px var(--pad);
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .header-actions .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Stack filter controls */
+  .filters > *, .toolbar > *, .filter-row > * {
+    flex: 1 1 100%;
+  }
+
+  /* If you have "side by side cards" set them to full width */
+  .grid, .columns, .two-col, .three-col {
+    display: block !important;
+  }
+
+  .grid.one {
+    display: block !important;
+  }
+
+  /* Make cards full width and spaced */
+  .card, .panel, .section {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  /* Ensure tab content doesn't squeeze */
+  .tab-panel {
+    padding: 12px 0;
+  }
+
+  /* Form rows stack on mobile */
+  .form .row.two {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stats stack on mobile */
+  .stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Filter rows stack on mobile */
+  .filter-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal behavior */
+  .modal, .dialog, .popup {
+    width: calc(100% - 18px);
+    max-height: calc(100vh - 18px);
+    overflow: auto;
+    margin: 9px auto;
+  }
+
+  /* Ensure buttons in toolbars stack nicely */
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .toolbar .btn {
+    width: 100%;
+  }
+
+  /* Property list items full width */
+  .property-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Brand section wraps on mobile */
+  .brand {
+    flex-wrap: wrap;
+  }
+}
