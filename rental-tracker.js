@@ -807,3 +807,65 @@
           const scale = Math.min(maxW / width, maxH / height, 1);
           const w = width * scale;
           const h = height * scale;
+
+          // Page break if image won't fit
+          const pageH = doc.internal.pageSize.getHeight();
+          if (y + h + 40 > pageH) {
+            doc.addPage();
+            y = 60;
+          }
+
+          // Embed image
+          doc.addImage(imgInfo.dataUrl, format, left, y, w, h);
+          y += h + 16;
+
+          // If we're near the bottom, start a new page for the next receipt
+          if (y + 40 > pageH) {
+            doc.addPage();
+            y = 60;
+          }
+        }
+      }
+    }
+
+    // Save PDF
+    const fileSafeTitle = String(title || "rental-report")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    const filename = `${fileSafeTitle || "rental-report"}-${todayISO()}.pdf`;
+    doc.save(filename);
+  }
+
+  // Helper used by exportPdf() – was missing
+  function safeLoadImage(dataUrl) {
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          // jsPDF expects format like "PNG" or "JPEG"
+          const fmt = dataUrl.startsWith("data:image/png")
+            ? "PNG"
+            : dataUrl.startsWith("data:image/webp")
+            ? "WEBP"
+            : "JPEG";
+          resolve({ width: img.width, height: img.height, format: fmt, dataUrl });
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
+  // Helper function for date formatting
+  function todayISO() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+})(); // Close the IIFE
