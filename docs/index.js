@@ -45,7 +45,8 @@ const LOGIN_REDIRECT = "rental-tracker.html"; // change to your tool route/page
 // If already signed in, go to app
 onAuthStateChanged(auth, (user) => {
   if (user && !window.location.pathname.endsWith(LOGIN_REDIRECT)) {
-    window.location.href = SITE.pageUrl(LOGIN_REDIRECT);
+    const target = (window.SITE && SITE.pageUrl) ? SITE.pageUrl(LOGIN_REDIRECT) : (`./${LOGIN_REDIRECT}`);
+    window.location.href = target;
   }
 });
 
@@ -75,7 +76,8 @@ loginForm.addEventListener("submit", async (e) => {
     setMsg(msg, "Signing in…");
     await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
     setMsg(msg, "Success! Redirecting…", "good");
-    window.location.href = SITE.pageUrl(LOGIN_REDIRECT);
+    const target = (window.SITE && SITE.pageUrl) ? SITE.pageUrl(LOGIN_REDIRECT) : (`./${LOGIN_REDIRECT}`);
+    window.location.href = target;
   } catch (err) {
     setMsg(msg, friendlyAuthError(err), "bad");
   }
@@ -90,7 +92,8 @@ signupForm.addEventListener("submit", async (e) => {
     setMsg(suMsg, "Creating account…");
     await createUserWithEmailAndPassword(auth, suEmail.value.trim(), suPassword.value);
     setMsg(suMsg, "Account created! Redirecting…", "good");
-    window.location.href = SITE.pageUrl(LOGIN_REDIRECT);
+    const target = (window.SITE && SITE.pageUrl) ? SITE.pageUrl(LOGIN_REDIRECT) : (`./${LOGIN_REDIRECT}`);
+    window.location.href = target;
   } catch (err) {
     setMsg(suMsg, friendlyAuthError(err), "bad");
   }
