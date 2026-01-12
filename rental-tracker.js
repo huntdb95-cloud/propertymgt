@@ -1,5 +1,6 @@
 (() => {
   window.__APP_LOADED__ = true;
+  console.log("Rental Tracker loaded from:", document.currentScript?.src);
   const STORAGE_KEY = "rental_tracker_v2";
 
   /**
