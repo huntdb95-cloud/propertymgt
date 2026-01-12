@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -10,16 +10,15 @@ import {
 /** 1) Paste your Firebase config here (Firebase Console → Project settings) */
 const firebaseConfig = {
   apiKey: "AIzaSyAnaQ5VJCnGD-M12ckzIsYfKR4DQ8h1L3k",
-    authDomain: "propert-ee9fb.firebaseapp.com",
-    projectId: "propert-ee9fb",
-    storageBucket: "propert-ee9fb.firebasestorage.app",
-    messagingSenderId: "109212957192",
-    appId: "1:109212957192:web:47cce38e2f36b19fce6fbd",
-    measurementId: "G-6QFEFTSLJN"
-  // storageBucket, messagingSenderId optional for auth-only pages
+  authDomain: "propert-ee9fb.firebaseapp.com",
+  projectId: "propert-ee9fb",
+  storageBucket: "propert-ee9fb.firebasestorage.app",
+  messagingSenderId: "109212957192",
+  appId: "1:109212957192:web:47cce38e2f36b19fce6fbd",
+  measurementId: "G-6QFEFTSLJN"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // ---- UI elements ----
@@ -45,7 +44,9 @@ const LOGIN_REDIRECT = "rental-tracker.html"; // change to your tool route/page
 
 // If already signed in, go to app
 onAuthStateChanged(auth, (user) => {
-  if (user) window.location.href = LOGIN_REDIRECT;
+  if (user && !window.location.pathname.endsWith(LOGIN_REDIRECT)) {
+    window.location.href = LOGIN_REDIRECT;
+  }
 });
 
 // Toggle signup
@@ -115,6 +116,8 @@ function setMsg(el, text, tone) {
   el.classList.remove("good", "bad");
   if (tone) el.classList.add(tone);
   el.textContent = text;
+  // Enable multi-line messages
+  el.style.whiteSpace = "pre-line";
 }
 
 function clearMessages() {
@@ -124,6 +127,17 @@ function clearMessages() {
 
 function friendlyAuthError(err) {
   const code = err?.code || "";
+  const hostname = window.location.hostname;
+  
+  // Diagnostics logging (dev only)
+  if (code) {
+    console.warn("Firebase Auth Error:", {
+      code: code,
+      message: err?.message || "",
+      hostname: hostname
+    });
+  }
+  
   if (code === "auth/invalid-email") return "That email address is not valid.";
   if (code === "auth/user-not-found") return "No user found with that email.";
   if (code === "auth/wrong-password") return "Incorrect password.";
@@ -131,5 +145,25 @@ function friendlyAuthError(err) {
   if (code === "auth/email-already-in-use") return "That email is already in use.";
   if (code === "auth/weak-password") return "Password is too weak (min 6 characters).";
   if (code === "auth/network-request-failed") return "Network error. Check your connection.";
+  
+  // Special handling for configuration-not-found
+  if (code === "auth/configuration-not-found") {
+    return `Firebase Auth is not configured correctly.
+
+Please check the following in Firebase Console:
+
+1. Firebase Console → Authentication → Sign-in method
+   → Enable "Email/Password" provider
+
+2. Firebase Console → Authentication → Settings → Authorized domains
+   → Add this domain: ${hostname}
+   → Keep "localhost" for development
+
+3. Google Cloud Console → APIs & Services → Enable APIs
+   → Enable "Identity Toolkit API" (or Firebase Auth API)
+
+Current hostname: ${hostname}`;
+  }
+  
   return `Sign-in error: ${code || "unknown"}`;
 }
