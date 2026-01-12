@@ -42,10 +42,19 @@ const demoFillBtn = document.getElementById("demoFillBtn");
 
 const LOGIN_REDIRECT = "rental-tracker.html"; // change to your tool route/page
 
+// Return a URL that works whether the site is deployed at:
+// - https://username.github.io/
+// - https://username.github.io/repo-name/
+function resolveAppUrl(file) {
+  // If index.html is in the current folder, this resolves correctly.
+  const base = new URL("./", window.location.href);
+  return new URL(file, base).toString();
+}
+
 // If already signed in, go to app
 onAuthStateChanged(auth, (user) => {
   if (user && !window.location.pathname.endsWith(LOGIN_REDIRECT)) {
-    window.location.href = LOGIN_REDIRECT;
+    window.location.href = resolveAppUrl(LOGIN_REDIRECT);
   }
 });
 
@@ -75,7 +84,7 @@ loginForm.addEventListener("submit", async (e) => {
     setMsg(msg, "Signing in…");
     await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
     setMsg(msg, "Success! Redirecting…", "good");
-    window.location.href = LOGIN_REDIRECT;
+    window.location.href = resolveAppUrl(LOGIN_REDIRECT);
   } catch (err) {
     setMsg(msg, friendlyAuthError(err), "bad");
   }
@@ -90,7 +99,7 @@ signupForm.addEventListener("submit", async (e) => {
     setMsg(suMsg, "Creating account…");
     await createUserWithEmailAndPassword(auth, suEmail.value.trim(), suPassword.value);
     setMsg(suMsg, "Account created! Redirecting…", "good");
-    window.location.href = LOGIN_REDIRECT;
+    window.location.href = resolveAppUrl(LOGIN_REDIRECT);
   } catch (err) {
     setMsg(suMsg, friendlyAuthError(err), "bad");
   }

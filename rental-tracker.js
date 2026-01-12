@@ -1,4 +1,5 @@
 (() => {
+  window.__APP_LOADED__ = true;
   const STORAGE_KEY = "rental_tracker_v2";
 
   /**
@@ -20,6 +21,9 @@
 
   // Tabs
   const tabButtons = [...document.querySelectorAll(".tab")];
+  if (!tabButtons.length) {
+    console.error("Tabs not found: .tab buttons missing. JS loaded but DOM selectors failed.");
+  }
   const tabPanels = {
     dashboard: document.getElementById("tab-dashboard"),
     properties: document.getElementById("tab-properties"),

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rental Property Tracker</title>
-  <link rel="stylesheet" href="rental-tracker.css" />
+  <link rel="stylesheet" href="./rental-tracker.css" />
 
   <!-- PDF export libs (client-side) -->
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -332,6 +332,23 @@
     <p class="subtle">Saves locally in your browser (localStorage). Receipts are stored as base64 (may hit storage limits).</p>
   </footer>
 
-  <script src="rental-tracker.js"></script>
+  <div id="runtimeErrorBanner" style="display:none; position:sticky; bottom:0; left:0; right:0; padding:10px 12px; background:#3b0d0d; color:#fff; font: 12px/1.4 system-ui; z-index:9999;">
+    App script failed to load. Open DevTools → Console/Network and check for 404 on rental-tracker.js or rental-tracker.css.
+  </div>
+
+  <script>
+    // If rental-tracker.js doesn't run and set this flag, show banner
+    window.__APP_LOADED__ = false;
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        if (!window.__APP_LOADED__) {
+          const b = document.getElementById("runtimeErrorBanner");
+          if (b) b.style.display = "block";
+        }
+      }, 300);
+    });
+  </script>
+
+  <script defer src="./rental-tracker.js"></script>
 </body>
 </html>
