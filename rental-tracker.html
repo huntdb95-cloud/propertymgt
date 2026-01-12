@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rental Property Tracker</title>
-  <script src="./base-path.js"></script>
+  <script src="./site-config.js"></script>
   <link id="rtCss" rel="stylesheet">
   <script>
     // Apply CSS with correct base path
     document.addEventListener("DOMContentLoaded", () => {
       const css = document.getElementById("rtCss");
-      css.href = assetUrl("rental-tracker.css");
+      css.href = SITE.assetUrl("rental-tracker.css");
     });
   </script>
 
@@ -345,9 +345,9 @@
   </div>
 
   <script>
-    console.log("Base URL:", new URL("./", window.location.href).toString());
-    console.log("Resolved JS:", assetUrl("rental-tracker.js"));
-    console.log("Resolved CSS:", assetUrl("rental-tracker.css"));
+    console.log("Base URL:", SITE.baseUrl);
+    console.log("Resolved JS:", SITE.assetUrl("rental-tracker.js"));
+    console.log("Resolved CSS:", SITE.assetUrl("rental-tracker.css"));
     
     // If rental-tracker.js doesn't run and set this flag, show banner
     window.__APP_LOADED__ = false;
@@ -356,8 +356,8 @@
         if (!window.__APP_LOADED__) {
           const b = document.getElementById("runtimeErrorBanner");
           if (b) {
-            const jsUrl = assetUrl("rental-tracker.js");
-            const cssUrl = assetUrl("rental-tracker.css");
+            const jsUrl = SITE.assetUrl("rental-tracker.js");
+            const cssUrl = SITE.assetUrl("rental-tracker.css");
             b.textContent = `App script failed to load. Attempted JS: ${jsUrl}, CSS: ${cssUrl}. Check DevTools → Network for 404 errors.`;
             b.style.display = "block";
           }
@@ -370,14 +370,14 @@
     // Load JS with correct base path
     (function () {
       const s = document.createElement("script");
-      s.src = assetUrl("rental-tracker.js");
+      s.src = SITE.assetUrl("rental-tracker.js");
       s.defer = true;
       s.onload = () => { window.__APP_LOADED__ = true; };
       s.onerror = () => {
         console.error("Failed to load rental-tracker.js from", s.src);
         const b = document.getElementById("runtimeErrorBanner");
         if (b) {
-          const cssUrl = assetUrl("rental-tracker.css");
+          const cssUrl = SITE.assetUrl("rental-tracker.css");
           b.textContent = `Failed to load rental-tracker.js from ${s.src}. CSS attempted: ${cssUrl}. Check DevTools → Network for 404 errors.`;
           b.style.display = "block";
         }
