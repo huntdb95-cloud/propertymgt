@@ -99,7 +99,12 @@
       const key = btn.dataset.tab;
 
       Object.values(tabPanels).forEach(p => p.classList.remove("active"));
-      tabPanels[key].classList.add("active");
+      const panel = tabPanels[key];
+      if (!panel) {
+        console.error("Missing tab panel for key:", key);
+        return;
+      }
+      panel.classList.add("active");
 
       // refresh report view on enter
       if (key === "reports") renderReports();
@@ -837,6 +842,246 @@
     doc.save(filename);
   }
 
+  // ---------------- Missing Helpers (REQUIRED) ----------------
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.warn("Failed to load state:", e);
+      return null;
+    }
+  }
+
+  function save(nextState) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    } catch (e) {
+      console.warn("Failed to save state:", e);
+      // Don't crash the app if storage is full
+      alert("Could not save data (browser storage full or blocked). Try removing large receipts or clicking Reset.");
+    }
+  }
+
+  function uid() {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function clampInt(v, min, max, fallback) {
+    const n = parseInt(v, 10);
+    if (Number.isNaN(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function round2(n) {
+    const x = Number(n || 0);
+    return Math.round(x * 100) / 100;
+  }
+
+  function money(n) {
+    const x = Number(n || 0);
+    try {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(x);
+    } catch {
+      return `$${x.toFixed(2)}`;
+    }
+  }
+
+  function totalsFromTxns(rows) {
+    let income = 0, expense = 0;
+    for (const t of rows || []) {
+      const amt = Number(t.amount || 0);
+      if (t.type === "income") income += amt;
+      else expense += amt;
+    }
+    return { income: round2(income), expense: round2(expense), net: round2(income - expense) };
+  }
+
+  function totalsForProperty(propertyId) {
+    const rows = state.txns.filter(t => t.propertyId === propertyId);
+    return totalsFromTxns(rows);
+  }
+
+  function leaseText(p) {
+    if (!p.leaseStart && !p.leaseEnd) return "No lease dates set";
+    const start = p.leaseStart ? new Date(p.leaseStart).toLocaleDateString() : "?";
+    const end = p.leaseEnd ? new Date(p.leaseEnd).toLocaleDateString() : "?";
+    return `Lease: ${start} → ${end}`;
+  }
+
+  function isValidDateStr(s) {
+    if (!s) return false;
+    const d = new Date(s);
+    return !Number.isNaN(d.getTime());
+  }
+
+  function fileToDataUrlReceipt(file, note) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve({
+          name: file.name,
+          mime: file.type || "application/octet-stream",
+          dataUrl: reader.result,
+          note: note || ""
+        });
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function ymKeyFromISODate(isoDate) {
+    // isoDate is "YYYY-MM-DD"
+    if (!isoDate || isoDate.length < 7) return "";
+    return isoDate.slice(0, 7);
+  }
+
+  function groupByMonth(rows) {
+    const out = {}; // { "YYYY-MM": {income, expense, net} }
+    for (const t of rows || []) {
+      const ym = ymKeyFromISODate(t.date);
+      if (!ym) continue;
+      if (!out[ym]) out[ym] = { income: 0, expense: 0, net: 0 };
+      const amt = Number(t.amount || 0);
+      if (t.type === "income") out[ym].income += amt;
+      else out[ym].expense += amt;
+    }
+    for (const ym of Object.keys(out)) {
+      out[ym].income = round2(out[ym].income);
+      out[ym].expense = round2(out[ym].expense);
+      out[ym].net = round2(out[ym].income - out[ym].expense);
+    }
+    return out;
+  }
+
+  function parseDateOrNull(yyyyMmDd, endOfDay = false) {
+    if (!yyyyMmDd) return null;
+    const suffix = endOfDay ? "T23:59:59" : "T00:00:00";
+    const d = new Date(yyyyMmDd + suffix);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function getDashboardFilteredTxns() {
+    const prop = filterProperty?.value || "all";
+    const from = parseDateOrNull(filterFrom?.value || "", false);
+    const to = parseDateOrNull(filterTo?.value || "", true);
+
+    return state.txns.filter(t => {
+      if (prop !== "all" && t.propertyId !== prop) return false;
+      const d = new Date(t.date + "T12:00:00");
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+  }
+
+  function getTxnFilteredTxns() {
+    const prop = txnFilterProperty?.value || "all";
+    const from = parseDateOrNull(txnFilterFrom?.value || "", false);
+    const to = parseDateOrNull(txnFilterTo?.value || "", true);
+
+    return state.txns.filter(t => {
+      if (prop !== "all" && t.propertyId !== prop) return false;
+      const d = new Date(t.date + "T12:00:00");
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+  }
+
+  function downloadTextFile(text, filename, mime) {
+    const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "download.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function csvEscape(v) {
+    const s = String(v ?? "");
+    if (/[",\n]/.test(s)) return `"${s.replaceAll('"', '""')}"`;
+    return s;
+  }
+
+  function txnsToCsv(rows) {
+    const header = ["date", "property", "type", "category", "amount", "description", "receipt_name", "receipt_note"];
+    const lines = [header.join(",")];
+
+    for (const t of rows || []) {
+      const p = state.properties.find(x => x.id === t.propertyId);
+      const receiptName = t.receipt?.name || "";
+      const receiptNote = t.receipt?.note || "";
+      lines.push([
+        t.date,
+        p?.name || "",
+        t.type || "",
+        t.category || "",
+        Number(t.amount || 0).toFixed(2),
+        t.desc || "",
+        receiptName,
+        receiptNote
+      ].map(csvEscape).join(","));
+    }
+    return lines.join("\n");
+  }
+
+  // Date helpers used by recurring rent + formatting
+  function addMonths(date, months) {
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+  }
+
+  function enumerateMonths(startDate, endDate) {
+    const out = [];
+    const d = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const end = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    while (d <= end) {
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      out.push(ym);
+      d.setMonth(d.getMonth() + 1);
+    }
+    return out;
+  }
+
+  function dateFromYMAndDay(ym, day) {
+    const [y, m] = ym.split("-").map(n => parseInt(n, 10));
+    const dd = clampInt(day, 1, 28, 1);
+    return new Date(y, (m - 1), dd);
+  }
+
+  function toISODate(d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function formatYM(ym) {
+    // ym = "YYYY-MM"
+    const [y, m] = ym.split("-").map(n => parseInt(n, 10));
+    const date = new Date(y, (m - 1), 1);
+    return date.toLocaleString(undefined, { month: "short", year: "numeric" });
+  }
+
   // Helper used by exportPdf() – was missing
   function safeLoadImage(dataUrl) {
     return new Promise((resolve) => {
@@ -866,6 +1111,14 @@
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Initial render on load
+  try {
+    renderAll();
+  } catch (e) {
+    console.error("App boot failed:", e);
+    alert("App failed to start. Open DevTools Console to see the error.");
   }
 
 })(); // Close the IIFE
