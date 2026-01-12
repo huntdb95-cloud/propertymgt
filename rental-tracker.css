@@ -394,4 +394,76 @@ table button, table .small-btn {
   .brand {
     flex-wrap: wrap;
   }
+
+  /* Transactions layout mobile */
+  .txn-layout {
+    align-items: stretch;   /* full width */
+  }
+
+  .txn-add-card,
+  .txn-list-card {
+    max-width: none;        /* full width on mobile */
+  }
+
+  /* Make any multi-column form fields stack */
+  #tab-transactions .form-row > *,
+  #tab-transactions .row > *,
+  #tab-transactions .filters > *,
+  #tab-transactions .toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  /* Table should scroll within container, not page */
+  #tab-transactions .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Transactions layout - base styles */
+.txn-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;     /* stack by default */
+  gap: 14px;
+  align-items: center;        /* center cards on desktop */
+}
+
+.txn-add-card,
+.txn-list-card {
+  width: 100%;
+  max-width: 900px;           /* match other pages' content width */
+}
+
+/* Make sure the cards look like other sections */
+.txn-add-card .card,
+.txn-list-card .card,
+.txn-add-card .panel,
+.txn-list-card .panel,
+.txn-add-card .section,
+.txn-list-card .section {
+  width: 100%;
+}
+
+/* Ensure Add Income/Expense form fits mobile nicely */
+#tab-transactions input,
+#tab-transactions select,
+#tab-transactions textarea {
+  width: 100%;
+}
+
+/* If there are form rows using flex, allow wrap and full-width on mobile */
+#tab-transactions .form-row,
+#tab-transactions .row,
+#tab-transactions .filters,
+#tab-transactions .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Buttons should not overflow */
+#tab-transactions button {
+  max-width: 100%;
 }
